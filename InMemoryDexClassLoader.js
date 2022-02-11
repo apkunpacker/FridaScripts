@@ -1,5 +1,5 @@
 /*
-Created By @Cryptx & Modified By @ApkUnpacker
+Created By @Cryptax & Modified By @ApkUnpacker
 */
 function ProcessName() {
     var openPtr = Module.getExportByName('libc.so', 'open');
