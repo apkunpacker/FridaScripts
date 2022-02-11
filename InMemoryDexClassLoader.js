@@ -91,7 +91,7 @@ try {
             if (remaining > 0) {
                 console.log('[-] Error: There are ' + remaining + ' remaining bytes!');
             } else {
-                console.log('[+] Dex dumped successfully in 2 ' + filename);
+                console.log('[+] Dex dumped successfully in ' + filename);
             }
             return object;
         }
