@@ -1,3 +1,6 @@
+/*
+https://github.com/xeondev1337/frida-scripts/blob/main/HackTools/Brawl%20Stars/arxankiller-v41.js
+*/
 const Libg = {
 	init: function() {
 		Libg.module = Process.findModuleByName('libg.so');
