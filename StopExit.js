@@ -1,4 +1,11 @@
+/*
+Made By @ApkUnpacker
+Make sure to enable AdvanceStop in extreme case as it unstable and checks
+are different on different apps. 
+
+*/
 var GlobalLogs = false;
+var AdvanceStop = false;
 Java.perform(function() {
     try {
         var Installer = Java.use("android.app.ApplicationPackageManager");
@@ -159,3 +166,41 @@ Interceptor.attach(Module.findExportByName("libc.so", "system"), {
     },
     onLeave: function(retval) {}
 });
+if (AdvanceStop == true) {
+    var abortPtr = Module.getExportByName('libc.so', 'abort');
+    var abort = new NativeFunction(abortPtr, 'int', ['int']);
+    var exitPtr = Module.getExportByName('libc.so', 'exit');
+    var exit = new NativeFunction(exitPtr, 'int', ['int']);
+    var _exitPtr = Module.getExportByName('libc.so', '_exit');
+    var _exit = new NativeFunction(_exitPtr, 'int', ['int']);
+    var killPtr = Module.getExportByName('libc.so', 'kill');
+    var kill = new NativeFunction(killPtr, 'int', ['int', 'int']);
+    var raisePtr = Module.getExportByName('libc.so', 'raise');
+    var raise = new NativeFunction(raisePtr, 'int', ['int']);
+    var shutdownPtr = Module.getExportByName('libc.so', 'shutdown');
+    var shutdown = new NativeFunction(shutdownPtr, 'int', ['int', 'int']);
+    Interceptor.replace(abortPtr, new NativeCallback(function(status) {
+        console.log('Abort Replaced');
+        return 0;
+    }, 'int', ['int']));
+    Interceptor.replace(exitPtr, new NativeCallback(function(status) {
+        console.log('Exit Replaced');
+        return 0;
+    }, 'int', ['int']));
+    Interceptor.replace(_exitPtr, new NativeCallback(function(status) {
+        console.log('_exit Replaced');
+        return 0;
+    }, 'int', ['int']));
+    Interceptor.replace(killPtr, new NativeCallback(function(pid, sig) {
+        console.log('Kill Replaced');
+        return 0;
+    }, 'int', ['int', 'int']));
+    Interceptor.replace(raisePtr, new NativeCallback(function(sig) {
+        console.log('Raise Replaced');
+        return 0;
+    }, 'int', ['int']));
+    Interceptor.replace(shutdownPtr, new NativeCallback(function(fd, how) {
+        console.log('Shutdown Replaced');
+        return 0;
+    }, 'int', ['int', 'int']));
+}
