@@ -1,11 +1,7 @@
 /*
 Made By @ApkUnpacker
-Make sure to enable AdvanceStop in extreme case as it unstable and checks
-are different on different apps. 
-
 */
 var GlobalLogs = false;
-var AdvanceStop = false;
 Java.perform(function() {
     try {
         var Installer = Java.use("android.app.ApplicationPackageManager");
@@ -166,7 +162,7 @@ Interceptor.attach(Module.findExportByName("libc.so", "system"), {
     },
     onLeave: function(retval) {}
 });
-if (AdvanceStop == true) {
+
     var abortPtr = Module.getExportByName('libc.so', 'abort');
     var abort = new NativeFunction(abortPtr, 'int', ['int']);
     var exitPtr = Module.getExportByName('libc.so', 'exit');
@@ -203,4 +199,4 @@ if (AdvanceStop == true) {
         console.log('Shutdown Replaced');
         return 0;
     }, 'int', ['int', 'int']));
-}
+
