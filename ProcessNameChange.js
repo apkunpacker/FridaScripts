@@ -1,3 +1,4 @@
+//Made by my idol Darvincisec
 var prctlPtr = Module.findExportByName(null, 'prctl');
 var prctlOri = new NativeFunction(prctlPtr,'int',['int','int','int','int','int'])
 Interceptor.replace(prctlPtr, new NativeCallback( function (a,b,c,d,e){
