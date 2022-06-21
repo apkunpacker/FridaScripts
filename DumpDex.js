@@ -1,3 +1,73 @@
+const fork_ptr = Module.getExportByName(null, "fork");
+const fork = new NativeFunction(fork_ptr, 'int', []);
+Interceptor.replace(fork_ptr, new NativeCallback(function () { 
+	console.warn("Fork Found and Replaced");
+	return -1;
+}, "int", []));
+
+var Color = {
+    RESET: "\x1b[39;49;00m",
+    Black: "0;01",
+    Blue: "4;01",
+    Cyan: "6;01",
+    Gray: "7;11",
+    Green: "2;01",
+    Purple: "5;01",
+    Red: "1;01",
+    Yellow: "3;01",
+    Light: {
+        Black: "0;11",
+        Blue: "4;11",
+        Cyan: "6;11",
+        Gray: "7;01",
+        Green: "2;11",
+        Purple: "5;11",
+        Red: "1;11",
+        Yellow: "3;11"
+    }
+};
+var LOG = function(input, kwargs) {
+    kwargs = kwargs || {};
+    var logLevel = kwargs['l'] || 'log',
+        colorPrefix = '\x1b[3',
+        colorSuffix = 'm';
+    if (typeof input === 'object')
+        input = JSON.stringify(input, null, kwargs['i'] ? 2 : null);
+    if (kwargs['c'])
+        input = colorPrefix + kwargs['c'] + colorSuffix + input + Color.RESET;
+    console[logLevel](input);
+};
+
+function Blue(str) {
+    LOG(str, {
+        c: Color.Blue
+    });
+}
+
+function Green(str) {
+    LOG(str, {
+        c: Color.Green
+    });
+}
+
+function Purple(str) {
+    LOG(str, {
+        c: Color.Purple
+    });
+}
+
+function Red(str) {
+    LOG(str, {
+        c: Color.Red
+    });
+}
+
+function Yellow(str) {
+    LOG(str, {
+        c: Color.Yellow
+    });
+}
+
 function ProcessName() {
     var openPtr = Module.getExportByName('libc.so', 'open');
     var open = new NativeFunction(openPtr, 'int', ['pointer', 'int']);
@@ -17,97 +87,65 @@ function ProcessName() {
     return -1;
 }
 
+function HeaderInfo(Buf, C) {
+    var ApkUnpacker = new Uint8Array(Buf);
+    var Check = 0;
+    var Count = C - 1;  
+    if (ApkUnpacker[0] == 0 || ApkUnpacker[0] != 100) 
+    {
+        Green("[*] Wiped Header Detected , Repair classes" + Count + ".dex Manually.This May Be Interesting Dex");
+        Check = 1;
+    }    
+    return Check;
+}
+
 function dump_dex() {
     var Pro = ProcessName();
     var libart = Process.findModuleByName("libart.so");
     var addr_DefineClass = null;
     var symbols = libart.enumerateSymbols();
-    for (var index = 0; index < symbols.length; index++) 
-    {
+    for (var index = 0; index < symbols.length; index++) {
         var symbol = symbols[index];
         var symbol_name = symbol.name;
-         if (symbol_name.indexOf("ClassLinker") >= 0 && 
-            symbol_name.indexOf("DefineClass") >= 0 && 
-            symbol_name.indexOf("Thread") >= 0 && 
-            symbol_name.indexOf("DexFile") >= 0 ) {
-            console.log(symbol_name, symbol.address);
+        if (symbol_name.indexOf("ClassLinker") >= 0 &&
+            symbol_name.indexOf("DefineClass") >= 0 &&
+            symbol_name.indexOf("Thread") >= 0 &&
+            symbol_name.indexOf("DexFile") >= 0) {
             addr_DefineClass = symbol.address;
+            Purple("Symbol Found : Lets Do The Work");
         }
     }
     var dex_maps = {};
     var dex_count = 1;
-    console.error("[DefineClass] : ", addr_DefineClass);
-    if (addr_DefineClass) {     
+    if (addr_DefineClass) {
         Interceptor.attach(addr_DefineClass, {
-            onEnter: function(args) {            
+            onEnter: function(args) {
                 var dex_file = args[5];
                 var base = ptr(dex_file).add(Process.pointerSize).readPointer();
                 var size = ptr(dex_file).add(Process.pointerSize + Process.pointerSize).readUInt();
-                if (dex_maps[base] == undefined) {                 
+                if (dex_maps[base] == undefined) {
                     dex_maps[base] = size;
-                    var magic = ptr(base).readCString();
-                    if (magic.indexOf("dex") == 0) {                                         
-                            var dex_dir_path = "/data/data/"+Pro+"/" ;                        
-                            var dex_path = dex_dir_path + (dex_count == 1 ? "1" : dex_count) +"_"+size+ ".dex";                       
-                            var fd = new File(dex_path, "wb");
-                            if (fd && fd != null) 
-                              {
-                           // if(size!="10244272" && size!="5263788" && size!="148644" && size!="311160" && size!="7368444" && size!="7491848" && size!="8190552" && size!="9519584" && size!="336652" && size!="10159140" && size!="4947360" && size!="404596" && size !="431528" && size!="260136" && size!="136128" && size!="409152" && size!="7796165" && size!="7111612" && size!="8503040" && size!="8222224" && size!="6862528")
-                              {  
-                                dex_count++;
-                                var dex_buffer = ptr(base).readByteArray(size);
-                                fd.write(dex_buffer);
-                                fd.flush();
-                                fd.close();
-                                console.warn("[Dump Dex]:", dex_path);
-                               }
-                            }
-                       }                    
+                    var dex_dir_path = "/data/data/" + Pro + "/";
+                //  var dex_dir_path = "/data/data/com.your.apk/";                   
+                    var dex_path = dex_dir_path + "classes" + dex_count + ".dex";
+                    var fd = new File(dex_path, "wb");
+                    if (fd && fd != null) {
+                        dex_count++;
+                        var dex_buffer = ptr(base).readByteArray(size);
+                        var Checks = HeaderInfo(dex_buffer, dex_count);
+                        fd.write(dex_buffer)
+                        fd.flush();
+                        fd.close();
+                        if (Checks == 1) {
+                            Purple("[Dex] :" + dex_path);
+                        } else {
+                            console.log("[Dex] :", dex_path);
+                        }
+                    }
                 }
             },
             onLeave: function(retval) {}
         });
     }
-}
-var is_hook_libart = false;
-function hook_dlopen() {
-    Interceptor.attach(Module.findExportByName(null, "dlopen"), {
-        onEnter: function(args) {
-            var pathptr = args[0];
-            if (pathptr !== undefined && pathptr != null) {
-                var path = ptr(pathptr).readCString();
-                console.log("dlopen:", path);
-                if (path.indexOf("libart.so") >= 0) {
-                    this.can_hook_libart = true;
-                    console.log("[dlopen:]", path);
-                }
-            }
-        },
-        onLeave: function(retval) {
-            if (this.can_hook_libart && !is_hook_libart) {
-                dump_dex();
-                is_hook_libart = true;
-            }
-        }
-    })
-Interceptor.attach(Module.findExportByName(null, "android_dlopen_ext"), {
-        onEnter: function(args) {
-            var pathptr = args[0];
-            if (pathptr !== undefined && pathptr != null) {
-                var path = ptr(pathptr).readCString();
-                console.log("android_dlopen_ext:", path);
-                if (path.indexOf("libart.so") >= 0) {
-                    this.can_hook_libart = true;
-                    console.log("[android_dlopen_ext:]", path);
-                }
-            }
-        },
-        onLeave: function(retval) {
-            if (this.can_hook_libart && !is_hook_libart) {
-                dump_dex();
-                is_hook_libart = true;
-            }
-        }
-    });
 }
 setImmediate(dump_dex);
