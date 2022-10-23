@@ -91,12 +91,24 @@ function HeaderInfo(Buf, C) {
     var ApkUnpacker = new Uint8Array(Buf);
     var Check = 0;
     var Count = C - 1;  
+    if(ApkUnpacker[0] == 99 && ApkUnpacker[1] == 100 && ApkUnpacker[2] == 101 && ApkUnpacker[3] == 120 && ApkUnpacker[4] == 48 && ApkUnpacker[5] == 48 && ApkUnpacker[6] == 49) {
+       Green("[*] cdex001 Header Detected. Probably classes"+Count+".dex is Not A Valid Dex");
+       return 1;
+    } 
+    else
+     if(ApkUnpacker[0] == 0 && ApkUnpacker[1] == 0 && ApkUnpacker[2] == 0 && ApkUnpacker[3] == 0 && ApkUnpacker[4] == 0 && ApkUnpacker[5] == 0 && ApkUnpacker[6] == 0) {
+       Green("[*] 0000000 Header Detected. Probably classes"+Count+".dex is Dexprotector Loaded Dex. Repair it Manually");
+       return 2;
+    } 
+    else   
     if (ApkUnpacker[0] == 0 || ApkUnpacker[0] != 100) 
     {
         Green("[*] Wiped Header Detected , Repair classes" + Count + ".dex Manually.This May Be Interesting Dex");
-        Check = 1;
-    }    
-    return Check;
+        return 3;
+    }  
+    else {     
+       return 0;
+     }
 }
 
 function dump_dex() {
@@ -138,8 +150,17 @@ function dump_dex() {
                         fd.close();
                         if (Checks == 1) {
                             Purple("[Dex] :" + dex_path);
-                        } else {
-                            console.log("[Dex] :", dex_path);
+                        } 
+                        else 
+                        if(Checks ==2) {
+                          Purple("[Dex] :" + dex_path);
+                        }
+                        else 
+                        if(Checks ==3) {
+                          Purple("[Dex] :" + dex_path);
+                        }
+                        else {
+                           console.log("[Dex] :", dex_path);
                         }
                     }
                 }
