@@ -89,7 +89,6 @@ function ProcessName() {
 
 function HeaderInfo(Buf, C) {
     var ApkUnpacker = new Uint8Array(Buf);
-    var Check = 0;
     var Count = C - 1;  
     if(ApkUnpacker[0] == 99 && ApkUnpacker[1] == 100 && ApkUnpacker[2] == 101 && ApkUnpacker[3] == 120 && ApkUnpacker[4] == 48 && ApkUnpacker[5] == 48 && ApkUnpacker[6] == 49) {
        Green("[*] cdex001 Header Detected. Probably classes"+Count+".dex is Not A Valid Dex");
