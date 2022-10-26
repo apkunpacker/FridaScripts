@@ -1,10 +1,9 @@
 const fork_ptr = Module.getExportByName(null, "fork");
 const fork = new NativeFunction(fork_ptr, 'int', []);
-Interceptor.replace(fork_ptr, new NativeCallback(function () { 
-	console.warn("Fork Found and Replaced");
-	return -1;
+Interceptor.replace(fork_ptr, new NativeCallback(function() {
+    console.warn("Fork Found and Replaced");
+    return -1;
 }, "int", []));
-
 var Color = {
     RESET: "\x1b[39;49;00m",
     Black: "0;01",
@@ -89,25 +88,21 @@ function ProcessName() {
 
 function HeaderInfo(Buf, C) {
     var ApkUnpacker = new Uint8Array(Buf);
-    var Count = C - 1;  
-    if(ApkUnpacker[0] == 99 && ApkUnpacker[1] == 100 && ApkUnpacker[2] == 101 && ApkUnpacker[3] == 120 && ApkUnpacker[4] == 48 && ApkUnpacker[5] == 48 && ApkUnpacker[6] == 49) {
-       Green("[*] cdex001 Header Detected. Probably classes"+Count+".dex is Not A Valid Dex");
-       return 1;
-    } 
-    else
-     if(ApkUnpacker[0] == 0 && ApkUnpacker[1] == 0 && ApkUnpacker[2] == 0 && ApkUnpacker[3] == 0 && ApkUnpacker[4] == 0 && ApkUnpacker[5] == 0 && ApkUnpacker[6] == 0) {
-       Green("[*] 0000000 Header Detected. Probably classes"+Count+".dex is Dexprotector Loaded Dex. Repair it Manually");
-       return 2;
-    } 
-    else   
-    if (ApkUnpacker[0] == 0 || ApkUnpacker[0] != 100) 
-    {
+    var Count = C - 1;
+    if (ApkUnpacker[0] == 99 && ApkUnpacker[1] == 100 && ApkUnpacker[2] == 101 && ApkUnpacker[3] == 120 && ApkUnpacker[4] == 48 && ApkUnpacker[5] == 48 && ApkUnpacker[6] == 49) {
+        Green("[*] cdex001 Header Detected. Probably classes" + Count + ".dex is Not A Valid Dex");
+        return 1;
+    } else
+    if (ApkUnpacker[0] == 0 && ApkUnpacker[1] == 0 && ApkUnpacker[2] == 0 && ApkUnpacker[3] == 0 && ApkUnpacker[4] == 0 && ApkUnpacker[5] == 0 && ApkUnpacker[6] == 0) {
+        Green("[*] 0000000 Header Detected. Probably classes" + Count + ".dex is Dexprotector Loaded Dex. Repair it Manually");
+        return 2;
+    } else
+    if (ApkUnpacker[0] == 0 || ApkUnpacker[0] != 100) {
         Green("[*] Wiped Header Detected , Repair classes" + Count + ".dex Manually.This May Be Interesting Dex");
         return 3;
-    }  
-    else {     
-       return 0;
-     }
+    } else {
+        return 0;
+    }
 }
 
 function dump_dex() {
@@ -137,7 +132,7 @@ function dump_dex() {
                 if (dex_maps[base] == undefined) {
                     dex_maps[base] = size;
                     var dex_dir_path = "/data/data/" + Pro + "/";
-                //  var dex_dir_path = "/data/data/com.your.apk/";                   
+                    //  var dex_dir_path = "/data/data/com.your.apk/";                   
                     var dex_path = dex_dir_path + "classes" + dex_count + ".dex";
                     var fd = new File(dex_path, "wb");
                     if (fd && fd != null) {
@@ -149,17 +144,14 @@ function dump_dex() {
                         fd.close();
                         if (Checks == 1) {
                             Purple("[Dex] :" + dex_path);
-                        } 
-                        else 
-                        if(Checks ==2) {
-                          Purple("[Dex] :" + dex_path);
-                        }
-                        else 
-                        if(Checks ==3) {
-                          Purple("[Dex] :" + dex_path);
-                        }
-                        else {
-                           console.log("[Dex] :", dex_path);
+                        } else
+                        if (Checks == 2) {
+                            Purple("[Dex] :" + dex_path);
+                        } else
+                        if (Checks == 3) {
+                            Purple("[Dex] :" + dex_path);
+                        } else {
+                            console.log("[Dex] :", dex_path);
                         }
                     }
                 }
