@@ -143,13 +143,13 @@ function dump_dex() {
                         fd.flush();
                         fd.close();
                         if (Checks == 1) {
-                            Purple("[Dex] :" + dex_path);
+                            Red("[Dex] :" + dex_path);
                         } else
                         if (Checks == 2) {
-                            Purple("[Dex] :" + dex_path);
+                            Red("[Dex] :" + dex_path);
                         } else
                         if (Checks == 3) {
-                            Purple("[Dex] :" + dex_path);
+                            Red("[Dex] :" + dex_path);
                         } else {
                             console.log("[Dex] :", dex_path);
                         }
