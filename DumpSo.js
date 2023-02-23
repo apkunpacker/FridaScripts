@@ -1,5 +1,6 @@
 var Location = "libname.so";
 var FileLoaded = 0
+
 function ProcessName() {
     var openPtr = Module.getExportByName('libc.so', 'open');
     var open = new NativeFunction(openPtr, 'int', ['pointer', 'int']);
@@ -18,24 +19,23 @@ function ProcessName() {
     }
     return -1;
 }
-
-Interceptor.attach(Module.findExportByName(null, 'android_dlopen_ext'),{
-    onEnter: function(args){
-        var library_path = Memory.readCString(args[0])        
-        if( library_path.indexOf(Location)>=0){
+Interceptor.attach(Module.findExportByName(null, 'android_dlopen_ext'), {
+    onEnter: function(args) {
+        var library_path = Memory.readCString(args[0])
+        if (library_path.indexOf(Location) >= 0) {
             console.warn("Loading library : " + library_path)
             FileLoaded = 1;
         }
     },
-    onLeave: function(retVal){
-        if(FileLoaded ==  1){  
-            var Pro =  ProcessName();            
-            var libso = Process.findModuleByName(Location);                       
+    onLeave: function(retVal) {
+        if (FileLoaded == 1) {
+            var Pro = ProcessName();
+            var libso = Process.findModuleByName(Location);
             console.log("[name]:", libso.name);
             console.log("[base]:", libso.base);
             console.log("[size]:", ptr(libso.size));
             console.log("[path]:", libso.path);
-            var file_path = "/data/data/"+Pro+ "/" + libso.name + "_" + libso.base + "_" + ptr(libso.size) + ".so";
+            var file_path = "/data/data/" + Pro + "/" + libso.name + "_" + libso.base + "_" + ptr(libso.size) + ".so";
             var file_handle = new File(file_path, "wb");
             if (file_handle && file_handle != null) {
                 Memory.protect(ptr(libso.base), libso.size, 'rwx');
@@ -45,10 +45,6 @@ Interceptor.attach(Module.findExportByName(null, 'android_dlopen_ext'),{
                 file_handle.close();
                 console.log("[dump]:", file_path);
             }
-            
-            
         }
-       }
-    } )
-    
-     
+    }
+})
