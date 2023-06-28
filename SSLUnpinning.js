@@ -50,8 +50,8 @@ function disableFlutterPinningv2() {
         var m = Process.findModuleByName(platformConfig["modulename"]);
         // If there is no loaded Flutter module, the setTimeout may trigger a second time, but after that we give up
         if (m === null) {
-            if (fallback) 
-             //console.log("[!] Flutter module not found.");
+            if (fallback) {
+            }
             return;
         }
         if (Process.arch in platformConfig["patterns"]) {
