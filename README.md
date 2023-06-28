@@ -39,7 +39,8 @@ This repository contains a collection of Frida scripts for various purposes, des
    It implements logic to hook and decrypt string of NP Manager string encryption.
 16. **ProcessNameChange.js:**
    It implements logic to change the process name at runtime. Logic is given by Legend Darvincisec.
-17. **StopExit.js:**
-   Some app exit/crash when abnormal envirunment is detected (Rooted/Frida/Tampering). It try to prevent the crash and shows the backtrace to pinpoint the crash point to better analysis
-18. **sslunpinning.js:**
+17. **SSLUnpinning.js:**
    SSL Unpinning script, collection of open source scripts and mixed into single one and fixed some bugs(Like void methods returning true in other's script)
+18. **StopExit.js:**
+   Some app exit/crash when abnormal envirunment is detected (Rooted/Frida/Tampering). It try to prevent the crash and shows the backtrace to pinpoint the crash point to better analysis
+
