@@ -17,10 +17,10 @@ function disableFlutterPinningv2() {
     };
     var TLSValidationDisabled = false;
     if (Java.available) {
-        console.log("[+] Java environment detected");
+        console.log("[+] Java Environment Detected");
         Java.perform(hookSystemLoadLibrary);
     } else if (ObjC.available) {
-        console.log("[+] iOS environment detected");
+        console.log("[+] iOS environment detected. Not Supported");
     }
     disableTLSValidation();
     setTimeout(disableTLSValidation, 2000, true);
@@ -50,7 +50,8 @@ function disableFlutterPinningv2() {
         var m = Process.findModuleByName(platformConfig["modulename"]);
         // If there is no loaded Flutter module, the setTimeout may trigger a second time, but after that we give up
         if (m === null) {
-            if (fallback) console.log("[!] Flutter module not found.");
+            if (fallback) 
+             //console.log("[!] Flutter module not found.");
             return;
         }
         if (Process.arch in platformConfig["patterns"]) {
@@ -123,7 +124,7 @@ function disablePinning() {
             }
         });
     } catch (e) {
-        console.warn("Not A Flutter App");
+        console.warn("[*] This is Not A Flutter Based APP");
     }
 }
 
@@ -796,14 +797,10 @@ setTimeout(function() {
                 }
             }
         });
-        console.log("[*] Flutter testing");
         setTimeout(disablePinning, 1000);
         disableFlutterPinningv2();
-        console.log("[*] Dynamic patching");
         dynamicPatching();
-        console.log("[*] CommonMethods");
         CommonMethods();
-        console.log("[*] Testing OKHTTP methods");
         try {
             var okhttp3_Activity = Java.use('okhttp3.CertificatePinner');
             okhttp3_Activity.check.overload('java.lang.String', 'java.util.List').implementation = function(str) {
