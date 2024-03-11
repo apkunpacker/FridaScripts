@@ -68,16 +68,6 @@ function hook_ssl_verify_peer_cert(address) {
     } catch (e) {}
 }
 
-
-
-Java.performNow(function() {
-    var DexFile = Java.use("dalvik.system.DexFile");
-    DexFile.loadDex.overload('java.lang.String', 'java.lang.String', 'int').implementation = function(dexPath, optimizedDirectory, flags) {
-        console.log("[+] Loading dex file:", dexPath);
-        return this.loadDex(dexPath, optimizedDirectory, flags);
-    };
-});
-
 /*
 On higher version of android , there may be issue that android reject runtime registered classes
 and throw error that writable dex are not allowed. We can try to set different permission for those file.
