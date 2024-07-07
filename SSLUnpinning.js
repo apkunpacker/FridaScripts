@@ -7,7 +7,7 @@ Java.performNow(function () {
     const DexClassLoader = Java.use("dalvik.system.DexClassLoader");
     DexClassLoader.$init.implementation = function (dexPath, optimizedDirectory, libraryPath, parent) {
         const JFile = Java.use('java.io.File');
-        if (dexPath.includes("/data/data/") && dexPath.includes("frida") && dexPath.includes("frida")) {
+        if (dexPath.includes("/data/data/") && dexPath.includes("frida") && dexPath.includes("dex")) {
             console.warn(`[*] Making ${dexPath} readonly`)
             JFile.$new(dexPath).setReadOnly()
             this.$init(dexPath, optimizedDirectory, libraryPath, parent);
