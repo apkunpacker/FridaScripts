@@ -3,32 +3,19 @@ Fork hook needed in case process spawn child process
 which causes frida to terminate. Return -1 only when you feel need of it.
 */
 
+/*
 const fork_ptr = Module.getExportByName(null, "fork");
 const fork = new NativeFunction(fork_ptr, 'int', []);
 Interceptor.replace(fork_ptr, new NativeCallback(function() {
     console.warn("Fork Found and Replaced");
-    //return fork()
-    return -1;
+    return fork()
+    //return -1;
 }, "int", []));
+*/
 
-function ProcessName() {
-    let openPtr = Module.getExportByName('libc.so', 'open');
-    let open = new NativeFunction(openPtr, 'int', ['pointer', 'int']);
-    let readPtr = Module.getExportByName('libc.so', 'read');
-    let read = new NativeFunction(readPtr, 'int', ['int', 'pointer', 'int']);
-    let closePtr = Module.getExportByName('libc.so', 'close');
-    let close = new NativeFunction(closePtr, 'int', ['int']);
-    let path = Memory.allocUtf8String('/proc/self/cmdline');
-    let fd = open(path, 0);
-    if (fd != -1) {
-        let buffer = Memory.alloc(0x1000);
-        let result = read(fd, buffer, 0x1000);
-        close(fd);
-        result = ptr(buffer).readCString();
-        return result;
-    }
-    return -1;
-}
+// Enter your package name here as getting process name on higher android version is tricky
+
+let Pro = "com.app.name"
 
 function ProcessDex(Buf, C,Path) {
     let ApkUnpacker = new Uint8Array(Buf);
@@ -62,7 +49,6 @@ function WriteDex(Count,Buffer,Path,Flag) {
 }
 
 function Dump_Dex() {
-    let Pro = ProcessName();
     let libart = Process.findModuleByName("libart.so");
     let addr_DefineClass = null;
     let symbols = libart.enumerateSymbols();
