@@ -1,12 +1,12 @@
-var Location = "libname.so";
-var FileLoaded = 0
+var targetLibrary = "libname.so";
 
-function ProcessName() {
-    var openPtr = Module.getExportByName('libc.so', 'open');
+function getProcessName() {
+    const libc = Process.getModuleByName('libc.so')
+    var openPtr = libc.getExportByName('open')
     var open = new NativeFunction(openPtr, 'int', ['pointer', 'int']);
-    var readPtr = Module.getExportByName('libc.so', 'read');
+    var readPtr = libc.getExportByName('read');
     var read = new NativeFunction(readPtr, 'int', ['int', 'pointer', 'int']);
-    var closePtr = Module.getExportByName('libc.so', 'close');
+    var closePtr = libc.getExportByName('close');
     var close = new NativeFunction(closePtr, 'int', ['int']);
     var path = Memory.allocUtf8String('/proc/self/cmdline');
     var fd = open(path, 0);
@@ -19,31 +19,31 @@ function ProcessName() {
     }
     return -1;
 }
-Interceptor.attach(Module.findExportByName(null, 'android_dlopen_ext'), {
+Interceptor.attach(Module.getGlobalExportByName('android_dlopen_ext'), {
     onEnter: function(args) {
-        var library_path = Memory.readCString(args[0])
-        if (library_path.indexOf(Location) >= 0) {
+        var library_path = args[0].readCString();
+        if (library_path.indexOf(targetLibrary) >= 0) {
             console.warn("Loading library : " + library_path)
-            FileLoaded = 1;
+            this.isTargetLibraryLoaded = true;
         }
     },
-    onLeave: function(retVal) {
-        if (FileLoaded == 1) {
-            var Pro = ProcessName();
-            var libso = Process.findModuleByName(Location);
-            console.log("[name]:", libso.name);
-            console.log("[base]:", libso.base);
-            console.log("[size]:", ptr(libso.size));
-            console.log("[path]:", libso.path);
-            var file_path = "/data/data/" + Pro + "/" + libso.name + "_" + libso.base + "_" + ptr(libso.size) + ".so";
-            var file_handle = new File(file_path, "wb");
-            if (file_handle && file_handle != null) {
-                Memory.protect(ptr(libso.base), libso.size, 'rwx');
-                var libso_buffer = ptr(libso.base).readByteArray(libso.size);
-                file_handle.write(libso_buffer);
-                file_handle.flush();
-                file_handle.close();
-                console.log("[dump]:", file_path);
+    onLeave: function(retval) {
+        if (this.isTargetLibraryLoaded) {
+            var processName = getProcessName();
+            var libraryModule = Process.findModuleByName(targetLibrary);
+            console.log("[name]:", libraryModule.name);
+            console.log("[base]:", libraryModule.base);
+            console.log("[size]:", ptr(libraryModule.size));
+            console.log("[path]:", libraryModule.path);
+            var outputFilePath = "/data/data/" + processName + "/" + libraryModule.name + "_" + libraryModule.base + "_" + ptr(libraryModule.size) + ".so";
+            var outputFile = new File(outputFilePath, "wb");
+            if (outputFile && outputFile != null) {
+                Memory.protect(ptr(libraryModule.base), libraryModule.size, 'rwx');
+                var libraryBuffer = ptr(libraryModule.base).readByteArray(libraryModule.size);
+                outputFile.write(libraryBuffer);
+                outputFile.flush();
+                outputFile.close();
+                console.log("[dump]:", outputFilePath);
             }
         }
     }
